@@ -1,7 +1,7 @@
 %% -*- erlang -*-
 {application, cassandra_thrift,
     [{description, "Cassandra Thrift Interface"},
-    {vsn, "2.2.0"},
+    {vsn, "19.4.0"},
     {modules, []},
     {registered, []},
     {mod, {'cassandra_thrift', []}},

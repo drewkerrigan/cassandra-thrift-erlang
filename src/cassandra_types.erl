@@ -11,12 +11,13 @@
 -export([struct_info/1]).
 %% struct column
 
-% -record(column, {name, value, timestamp}).
+% -record(column, {name, value, timestamp, ttl}).
 
 struct_info('column') ->
   {struct, [{1, string},
   {2, string},
-  {3, i64}]}
+  {3, i64},
+  {4, i32}]}
 ;
 
 %% struct superColumn
@@ -124,6 +125,26 @@ struct_info('slicePredicate') ->
   {2, {struct, {'cassandra_types', 'sliceRange'}}}]}
 ;
 
+%% struct indexExpression
+
+% -record(indexExpression, {column_name, op, value}).
+
+struct_info('indexExpression') ->
+  {struct, [{1, string},
+  {2, i32},
+  {3, string}]}
+;
+
+%% struct indexClause
+
+% -record(indexClause, {expressions, start_key, count}).
+
+struct_info('indexClause') ->
+  {struct, [{1, {list, {struct, {'cassandra_types', 'indexExpression'}}}},
+  {2, string},
+  {3, i32}]}
+;
+
 %% struct keyRange
 
 % -record(keyRange, {start_key, end_key, start_token, end_token, count}).
@@ -143,6 +164,15 @@ struct_info('keyRange') ->
 struct_info('keySlice') ->
   {struct, [{1, string},
   {2, {list, {struct, {'cassandra_types', 'columnOrSuperColumn'}}}}]}
+;
+
+%% struct keyCount
+
+% -record(keyCount, {key, count}).
+
+struct_info('keyCount') ->
+  {struct, [{1, string},
+  {2, i32}]}
 ;
 
 %% struct deletion
@@ -180,6 +210,56 @@ struct_info('tokenRange') ->
 
 struct_info('authenticationRequest') ->
   {struct, [{1, {map, string, string}}]}
+;
+
+%% struct columnDef
+
+% -record(columnDef, {name, validation_class, index_type, index_name}).
+
+struct_info('columnDef') ->
+  {struct, [{1, string},
+  {2, string},
+  {3, i32},
+  {4, string}]}
+;
+
+%% struct cfDef
+
+% -record(cfDef, {keyspace, name, column_type, comparator_type, subcomparator_type, comment, row_cache_size, key_cache_size, read_repair_chance, column_metadata, gc_grace_seconds, default_validation_class, id, min_compaction_threshold, max_compaction_threshold, row_cache_save_period_in_seconds, key_cache_save_period_in_seconds, memtable_flush_after_mins, memtable_throughput_in_mb, memtable_operations_in_millions}).
+
+struct_info('cfDef') ->
+  {struct, [{1, string},
+  {2, string},
+  {3, string},
+  {5, string},
+  {6, string},
+  {8, string},
+  {9, double},
+  {11, double},
+  {12, double},
+  {13, {list, {struct, {'cassandra_types', 'columnDef'}}}},
+  {14, i32},
+  {15, string},
+  {16, i32},
+  {17, i32},
+  {18, i32},
+  {19, i32},
+  {20, i32},
+  {21, i32},
+  {22, i32},
+  {23, double}]}
+;
+
+%% struct ksDef
+
+% -record(ksDef, {name, strategy_class, strategy_options, replication_factor, cf_defs}).
+
+struct_info('ksDef') ->
+  {struct, [{1, string},
+  {2, string},
+  {3, {map, string, string}},
+  {4, i32},
+  {5, {list, {struct, {'cassandra_types', 'cfDef'}}}}]}
 ;
 
 struct_info('i am a dummy struct') -> undefined.

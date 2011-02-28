@@ -7,5 +7,5 @@
 
 -include("cassandra_types.hrl").
 
--define(cassandra_VERSION, "2.2.0").
+-define(cassandra_VERSION, "19.4.0").
 

@@ -14,10 +14,9 @@
 
 struct_info('i am a dummy struct') -> undefined.
 %%% interface
-% login(This, Keyspace, Auth_request)
+% login(This, Auth_request)
 function_info('login', params_type) ->
-  {struct, [{1, string},
-  {2, {struct, {'cassandra_types', 'authenticationRequest'}}}]}
+  {struct, [{1, {struct, {'cassandra_types', 'authenticationRequest'}}}]}
 ;
 function_info('login', reply_type) ->
   {struct, []};
@@ -25,12 +24,20 @@ function_info('login', exceptions) ->
   {struct, [{1, {struct, {'cassandra_types', 'authenticationException'}}},
   {2, {struct, {'cassandra_types', 'authorizationException'}}}]}
 ;
-% get(This, Keyspace, Key, Column_path, Consistency_level)
+% set_keyspace(This, Keyspace)
+function_info('set_keyspace', params_type) ->
+  {struct, [{1, string}]}
+;
+function_info('set_keyspace', reply_type) ->
+  {struct, []};
+function_info('set_keyspace', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}}]}
+;
+% get(This, Key, Column_path, Consistency_level)
 function_info('get', params_type) ->
   {struct, [{1, string},
-  {2, string},
-  {3, {struct, {'cassandra_types', 'columnPath'}}},
-  {4, i32}]}
+  {2, {struct, {'cassandra_types', 'columnPath'}}},
+  {3, i32}]}
 ;
 function_info('get', reply_type) ->
   {struct, {'cassandra_types', 'columnOrSuperColumn'}};
@@ -40,13 +47,12 @@ function_info('get', exceptions) ->
   {3, {struct, {'cassandra_types', 'unavailableException'}}},
   {4, {struct, {'cassandra_types', 'timedOutException'}}}]}
 ;
-% get_slice(This, Keyspace, Key, Column_parent, Predicate, Consistency_level)
+% get_slice(This, Key, Column_parent, Predicate, Consistency_level)
 function_info('get_slice', params_type) ->
   {struct, [{1, string},
-  {2, string},
-  {3, {struct, {'cassandra_types', 'columnParent'}}},
-  {4, {struct, {'cassandra_types', 'slicePredicate'}}},
-  {5, i32}]}
+  {2, {struct, {'cassandra_types', 'columnParent'}}},
+  {3, {struct, {'cassandra_types', 'slicePredicate'}}},
+  {4, i32}]}
 ;
 function_info('get_slice', reply_type) ->
   {list, {struct, {'cassandra_types', 'columnOrSuperColumn'}}};
@@ -55,40 +61,11 @@ function_info('get_slice', exceptions) ->
   {2, {struct, {'cassandra_types', 'unavailableException'}}},
   {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
 ;
-% multiget(This, Keyspace, Keys, Column_path, Consistency_level)
-function_info('multiget', params_type) ->
-  {struct, [{1, string},
-  {2, {list, string}},
-  {3, {struct, {'cassandra_types', 'columnPath'}}},
-  {4, i32}]}
-;
-function_info('multiget', reply_type) ->
-  {map, string, {struct, {'cassandra_types', 'columnOrSuperColumn'}}};
-function_info('multiget', exceptions) ->
-  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}},
-  {2, {struct, {'cassandra_types', 'unavailableException'}}},
-  {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
-;
-% multiget_slice(This, Keyspace, Keys, Column_parent, Predicate, Consistency_level)
-function_info('multiget_slice', params_type) ->
-  {struct, [{1, string},
-  {2, {list, string}},
-  {3, {struct, {'cassandra_types', 'columnParent'}}},
-  {4, {struct, {'cassandra_types', 'slicePredicate'}}},
-  {5, i32}]}
-;
-function_info('multiget_slice', reply_type) ->
-  {map, string, {list, {struct, {'cassandra_types', 'columnOrSuperColumn'}}}};
-function_info('multiget_slice', exceptions) ->
-  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}},
-  {2, {struct, {'cassandra_types', 'unavailableException'}}},
-  {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
-;
-% get_count(This, Keyspace, Key, Column_parent, Consistency_level)
+% get_count(This, Key, Column_parent, Predicate, Consistency_level)
 function_info('get_count', params_type) ->
   {struct, [{1, string},
-  {2, string},
-  {3, {struct, {'cassandra_types', 'columnParent'}}},
+  {2, {struct, {'cassandra_types', 'columnParent'}}},
+  {3, {struct, {'cassandra_types', 'slicePredicate'}}},
   {4, i32}]}
 ;
 function_info('get_count', reply_type) ->
@@ -98,30 +75,40 @@ function_info('get_count', exceptions) ->
   {2, {struct, {'cassandra_types', 'unavailableException'}}},
   {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
 ;
-% get_range_slice(This, Keyspace, Column_parent, Predicate, Start_key, Finish_key, Row_count, Consistency_level)
-function_info('get_range_slice', params_type) ->
-  {struct, [{1, string},
+% multiget_slice(This, Keys, Column_parent, Predicate, Consistency_level)
+function_info('multiget_slice', params_type) ->
+  {struct, [{1, {list, string}},
   {2, {struct, {'cassandra_types', 'columnParent'}}},
   {3, {struct, {'cassandra_types', 'slicePredicate'}}},
-  {4, string},
-  {5, string},
-  {6, i32},
-  {7, i32}]}
+  {4, i32}]}
 ;
-function_info('get_range_slice', reply_type) ->
-  {list, {struct, {'cassandra_types', 'keySlice'}}};
-function_info('get_range_slice', exceptions) ->
+function_info('multiget_slice', reply_type) ->
+  {map, string, {list, {struct, {'cassandra_types', 'columnOrSuperColumn'}}}};
+function_info('multiget_slice', exceptions) ->
   {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}},
   {2, {struct, {'cassandra_types', 'unavailableException'}}},
   {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
 ;
-% get_range_slices(This, Keyspace, Column_parent, Predicate, Range, Consistency_level)
-function_info('get_range_slices', params_type) ->
-  {struct, [{1, string},
+% multiget_count(This, Keys, Column_parent, Predicate, Consistency_level)
+function_info('multiget_count', params_type) ->
+  {struct, [{1, {list, string}},
   {2, {struct, {'cassandra_types', 'columnParent'}}},
   {3, {struct, {'cassandra_types', 'slicePredicate'}}},
-  {4, {struct, {'cassandra_types', 'keyRange'}}},
-  {5, i32}]}
+  {4, i32}]}
+;
+function_info('multiget_count', reply_type) ->
+  {map, string, i32};
+function_info('multiget_count', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}},
+  {2, {struct, {'cassandra_types', 'unavailableException'}}},
+  {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
+;
+% get_range_slices(This, Column_parent, Predicate, Range, Consistency_level)
+function_info('get_range_slices', params_type) ->
+  {struct, [{1, {struct, {'cassandra_types', 'columnParent'}}},
+  {2, {struct, {'cassandra_types', 'slicePredicate'}}},
+  {3, {struct, {'cassandra_types', 'keyRange'}}},
+  {4, i32}]}
 ;
 function_info('get_range_slices', reply_type) ->
   {list, {struct, {'cassandra_types', 'keySlice'}}};
@@ -130,14 +117,26 @@ function_info('get_range_slices', exceptions) ->
   {2, {struct, {'cassandra_types', 'unavailableException'}}},
   {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
 ;
-% insert(This, Keyspace, Key, Column_path, Value, Timestamp, Consistency_level)
+% get_indexed_slices(This, Column_parent, Index_clause, Column_predicate, Consistency_level)
+function_info('get_indexed_slices', params_type) ->
+  {struct, [{1, {struct, {'cassandra_types', 'columnParent'}}},
+  {2, {struct, {'cassandra_types', 'indexClause'}}},
+  {3, {struct, {'cassandra_types', 'slicePredicate'}}},
+  {4, i32}]}
+;
+function_info('get_indexed_slices', reply_type) ->
+  {list, {struct, {'cassandra_types', 'keySlice'}}};
+function_info('get_indexed_slices', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}},
+  {2, {struct, {'cassandra_types', 'unavailableException'}}},
+  {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
+;
+% insert(This, Key, Column_parent, Column, Consistency_level)
 function_info('insert', params_type) ->
   {struct, [{1, string},
-  {2, string},
-  {3, {struct, {'cassandra_types', 'columnPath'}}},
-  {4, string},
-  {5, i64},
-  {6, i32}]}
+  {2, {struct, {'cassandra_types', 'columnParent'}}},
+  {3, {struct, {'cassandra_types', 'column'}}},
+  {4, i32}]}
 ;
 function_info('insert', reply_type) ->
   {struct, []};
@@ -146,27 +145,12 @@ function_info('insert', exceptions) ->
   {2, {struct, {'cassandra_types', 'unavailableException'}}},
   {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
 ;
-% batch_insert(This, Keyspace, Key, Cfmap, Consistency_level)
-function_info('batch_insert', params_type) ->
-  {struct, [{1, string},
-  {2, string},
-  {3, {map, string, {list, {struct, {'cassandra_types', 'columnOrSuperColumn'}}}}},
-  {4, i32}]}
-;
-function_info('batch_insert', reply_type) ->
-  {struct, []};
-function_info('batch_insert', exceptions) ->
-  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}},
-  {2, {struct, {'cassandra_types', 'unavailableException'}}},
-  {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
-;
-% remove(This, Keyspace, Key, Column_path, Timestamp, Consistency_level)
+% remove(This, Key, Column_path, Timestamp, Consistency_level)
 function_info('remove', params_type) ->
   {struct, [{1, string},
-  {2, string},
-  {3, {struct, {'cassandra_types', 'columnPath'}}},
-  {4, i64},
-  {5, i32}]}
+  {2, {struct, {'cassandra_types', 'columnPath'}}},
+  {3, i64},
+  {4, i32}]}
 ;
 function_info('remove', reply_type) ->
   {struct, []};
@@ -175,11 +159,10 @@ function_info('remove', exceptions) ->
   {2, {struct, {'cassandra_types', 'unavailableException'}}},
   {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
 ;
-% batch_mutate(This, Keyspace, Mutation_map, Consistency_level)
+% batch_mutate(This, Mutation_map, Consistency_level)
 function_info('batch_mutate', params_type) ->
-  {struct, [{1, string},
-  {2, {map, string, {map, string, {list, {struct, {'cassandra_types', 'mutation'}}}}}},
-  {3, i32}]}
+  {struct, [{1, {map, string, {map, string, {list, {struct, {'cassandra_types', 'mutation'}}}}}},
+  {2, i32}]}
 ;
 function_info('batch_mutate', reply_type) ->
   {struct, []};
@@ -188,32 +171,33 @@ function_info('batch_mutate', exceptions) ->
   {2, {struct, {'cassandra_types', 'unavailableException'}}},
   {3, {struct, {'cassandra_types', 'timedOutException'}}}]}
 ;
-% get_string_property(This, Property)
-function_info('get_string_property', params_type) ->
+% truncate(This, Cfname)
+function_info('truncate', params_type) ->
   {struct, [{1, string}]}
 ;
-function_info('get_string_property', reply_type) ->
-  string;
-function_info('get_string_property', exceptions) ->
+function_info('truncate', reply_type) ->
+  {struct, []};
+function_info('truncate', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}},
+  {2, {struct, {'cassandra_types', 'unavailableException'}}}]}
+;
+% describe_schema_versions(This)
+function_info('describe_schema_versions', params_type) ->
   {struct, []}
 ;
-% get_string_list_property(This, Property)
-function_info('get_string_list_property', params_type) ->
-  {struct, [{1, string}]}
-;
-function_info('get_string_list_property', reply_type) ->
-  {list, string};
-function_info('get_string_list_property', exceptions) ->
-  {struct, []}
+function_info('describe_schema_versions', reply_type) ->
+  {map, string, {list, string}};
+function_info('describe_schema_versions', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}}]}
 ;
 % describe_keyspaces(This)
 function_info('describe_keyspaces', params_type) ->
   {struct, []}
 ;
 function_info('describe_keyspaces', reply_type) ->
-  {set, string};
+  {list, {struct, {'cassandra_types', 'ksDef'}}};
 function_info('describe_keyspaces', exceptions) ->
-  {struct, []}
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}}]}
 ;
 % describe_cluster_name(This)
 function_info('describe_cluster_name', params_type) ->
@@ -251,25 +235,90 @@ function_info('describe_partitioner', reply_type) ->
 function_info('describe_partitioner', exceptions) ->
   {struct, []}
 ;
+% describe_snitch(This)
+function_info('describe_snitch', params_type) ->
+  {struct, []}
+;
+function_info('describe_snitch', reply_type) ->
+  string;
+function_info('describe_snitch', exceptions) ->
+  {struct, []}
+;
 % describe_keyspace(This, Keyspace)
 function_info('describe_keyspace', params_type) ->
   {struct, [{1, string}]}
 ;
 function_info('describe_keyspace', reply_type) ->
-  {map, string, {map, string, string}};
+  {struct, {'cassandra_types', 'ksDef'}};
 function_info('describe_keyspace', exceptions) ->
-  {struct, [{1, {struct, {'cassandra_types', 'notFoundException'}}}]}
+  {struct, [{1, {struct, {'cassandra_types', 'notFoundException'}}},
+  {2, {struct, {'cassandra_types', 'invalidRequestException'}}}]}
 ;
-% describe_splits(This, Start_token, End_token, Keys_per_split)
+% describe_splits(This, CfName, Start_token, End_token, Keys_per_split)
 function_info('describe_splits', params_type) ->
   {struct, [{1, string},
   {2, string},
-  {3, i32}]}
+  {3, string},
+  {4, i32}]}
 ;
 function_info('describe_splits', reply_type) ->
   {list, string};
 function_info('describe_splits', exceptions) ->
   {struct, []}
 ;
-function_info(xxx, dummy) -> dummy.
+% system_add_column_family(This, Cf_def)
+function_info('system_add_column_family', params_type) ->
+  {struct, [{1, {struct, {'cassandra_types', 'cfDef'}}}]}
+;
+function_info('system_add_column_family', reply_type) ->
+  string;
+function_info('system_add_column_family', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}}]}
+;
+% system_drop_column_family(This, Column_family)
+function_info('system_drop_column_family', params_type) ->
+  {struct, [{1, string}]}
+;
+function_info('system_drop_column_family', reply_type) ->
+  string;
+function_info('system_drop_column_family', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}}]}
+;
+% system_add_keyspace(This, Ks_def)
+function_info('system_add_keyspace', params_type) ->
+  {struct, [{1, {struct, {'cassandra_types', 'ksDef'}}}]}
+;
+function_info('system_add_keyspace', reply_type) ->
+  string;
+function_info('system_add_keyspace', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}}]}
+;
+% system_drop_keyspace(This, Keyspace)
+function_info('system_drop_keyspace', params_type) ->
+  {struct, [{1, string}]}
+;
+function_info('system_drop_keyspace', reply_type) ->
+  string;
+function_info('system_drop_keyspace', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}}]}
+;
+% system_update_keyspace(This, Ks_def)
+function_info('system_update_keyspace', params_type) ->
+  {struct, [{1, {struct, {'cassandra_types', 'ksDef'}}}]}
+;
+function_info('system_update_keyspace', reply_type) ->
+  string;
+function_info('system_update_keyspace', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}}]}
+;
+% system_update_column_family(This, Cf_def)
+function_info('system_update_column_family', params_type) ->
+  {struct, [{1, {struct, {'cassandra_types', 'cfDef'}}}]}
+;
+function_info('system_update_column_family', reply_type) ->
+  string;
+function_info('system_update_column_family', exceptions) ->
+  {struct, [{1, {struct, {'cassandra_types', 'invalidRequestException'}}}]}
+;
+function_info(_Func, _Info) -> no_function.
 
