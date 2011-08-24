@@ -1,0 +1,4 @@
+{application, cassandra, [
+  {description, "Cassandra Thrift Interface"},
+  {vsn, "19.10.0"}
+]}.
