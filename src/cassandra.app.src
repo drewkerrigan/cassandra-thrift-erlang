@@ -1,4 +1,4 @@
-{application, cassandra, [
+{application, cassandra_thrift, [
   {description, "Cassandra Thrift Interface"},
-  {vsn, "19.10.0"}
+  {vsn, "19.30.0"}
 ]}.

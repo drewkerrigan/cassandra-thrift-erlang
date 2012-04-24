@@ -17,6 +17,7 @@
 -define(cassandra_IndexOperator_LT, 4).
 
 -define(cassandra_IndexType_KEYS, 0).
+-define(cassandra_IndexType_CUSTOM, 1).
 
 -define(cassandra_Compression_GZIP, 1).
 -define(cassandra_Compression_NONE, 2).
@@ -123,6 +124,7 @@
                    end_key = undefined :: string(), 
                    start_token = undefined :: string(), 
                    end_token = undefined :: string(), 
+                   row_filter = [] :: list(), 
                    count = 100 :: integer()}).
 
 %% struct keySlice
@@ -146,11 +148,19 @@
 -record(mutation, {column_or_supercolumn = #columnOrSuperColumn{} :: #columnOrSuperColumn{}, 
                    deletion = #deletion{} :: #deletion{}}).
 
+%% struct endpointDetails
+
+-record(endpointDetails, {host = undefined :: string(), 
+                          datacenter = undefined :: string(), 
+                          rack = undefined :: string()}).
+
 %% struct tokenRange
 
 -record(tokenRange, {start_token = undefined :: string(), 
                      end_token = undefined :: string(), 
-                     endpoints = [] :: list()}).
+                     endpoints = [] :: list(), 
+                     rpc_endpoints = [] :: list(), 
+                     endpoint_details = [] :: list()}).
 
 %% struct authenticationRequest
 
@@ -161,7 +171,8 @@
 -record(columnDef, {name = undefined :: string(), 
                     validation_class = undefined :: string(), 
                     index_type = undefined :: integer(), 
-                    index_name = undefined :: string()}).
+                    index_name = undefined :: string(), 
+                    index_options = dict:new() :: dict()}).
 
 %% struct cfDef
 
@@ -171,25 +182,32 @@
                 comparator_type = "BytesType" :: string(), 
                 subcomparator_type = undefined :: string(), 
                 comment = undefined :: string(), 
-                row_cache_size = 0 :: float(), 
-                key_cache_size = 200000 :: float(), 
-                read_repair_chance = 1 :: float(), 
+                read_repair_chance = undefined :: float(), 
                 column_metadata = [] :: list(), 
                 gc_grace_seconds = undefined :: integer(), 
                 default_validation_class = undefined :: string(), 
                 id = undefined :: integer(), 
                 min_compaction_threshold = undefined :: integer(), 
                 max_compaction_threshold = undefined :: integer(), 
+                replicate_on_write = undefined :: boolean(), 
+                key_validation_class = undefined :: string(), 
+                key_alias = undefined :: string(), 
+                compaction_strategy = undefined :: string(), 
+                compaction_strategy_options = dict:new() :: dict(), 
+                compression_options = dict:new() :: dict(), 
+                bloom_filter_fp_chance = undefined :: float(), 
+                caching = "keys_only" :: string(), 
+                dclocal_read_repair_chance = 0 :: float(), 
+                row_cache_size = undefined :: float(), 
+                key_cache_size = undefined :: float(), 
                 row_cache_save_period_in_seconds = undefined :: integer(), 
                 key_cache_save_period_in_seconds = undefined :: integer(), 
                 memtable_flush_after_mins = undefined :: integer(), 
                 memtable_throughput_in_mb = undefined :: integer(), 
                 memtable_operations_in_millions = undefined :: float(), 
-                replicate_on_write = undefined :: boolean(), 
                 merge_shards_chance = undefined :: float(), 
-                key_validation_class = undefined :: string(), 
-                row_cache_provider = "org.apache.cassandra.cache.ConcurrentLinkedHashCacheProvider" :: string(), 
-                key_alias = undefined :: string()}).
+                row_cache_provider = undefined :: string(), 
+                row_cache_keys_to_save = undefined :: integer()}).
 
 %% struct ksDef
 
@@ -205,10 +223,24 @@
 -record(cqlRow, {key = undefined :: string(), 
                  columns = [] :: list()}).
 
+%% struct cqlMetadata
+
+-record(cqlMetadata, {name_types = dict:new() :: dict(), 
+                      value_types = dict:new() :: dict(), 
+                      default_name_type = undefined :: string(), 
+                      default_value_type = undefined :: string()}).
+
 %% struct cqlResult
 
 -record(cqlResult, {type = undefined :: integer(), 
                     rows = [] :: list(), 
-                    num = undefined :: integer()}).
+                    num = undefined :: integer(), 
+                    schema = #cqlMetadata{} :: #cqlMetadata{}}).
+
+%% struct cqlPreparedResult
+
+-record(cqlPreparedResult, {itemId = undefined :: integer(), 
+                            count = undefined :: integer(), 
+                            variable_types = [] :: list()}).
 
 -endif.
